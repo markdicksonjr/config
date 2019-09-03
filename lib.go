@@ -45,18 +45,16 @@ func Load(configWithDefaultValues interface{}, envPrefix ...string) (interface{}
 		}
 
 		// allow a config file to overwrite the "default" config
-		mergedCfg, err := dot.Extend(configWithDefaultValues, cfgFromFile)
+		err = dot.Extend(configWithDefaultValues, cfgFromFile)
 		if err != nil {
 			return configWithDefaultValues, err
 		}
-
-		configWithDefaultValues = mergedCfg
 	}
 
 	// the order of precedence is file, env, flag
 
 	// process flags -> default/merged config
-	newCfg, err := dot.Extend(configWithDefaultValues, flagCfg)
+	err = dot.Extend(configWithDefaultValues, flagCfg)
 	if err != nil {
 		return configWithDefaultValues, err
 	}
@@ -66,19 +64,10 @@ func Load(configWithDefaultValues interface{}, envPrefix ...string) (interface{}
 	if len(envPrefix) > 0 {
 		prefix = envPrefix[0]
 	}
-	if err := applyEnv(newCfg, prefix); err != nil {
+	if err := applyEnv(configWithDefaultValues, prefix); err != nil {
 		return configWithDefaultValues, err
 	}
 
-	cfgStr, err := json.Marshal(newCfg)
-	if err != nil {
-		return configWithDefaultValues, err
-
-	}
-
-	if err := json.Unmarshal(cfgStr, &configWithDefaultValues); err != nil {
-		return configWithDefaultValues, err
-	}
 	return configWithDefaultValues, nil
 }
 

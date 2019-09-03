@@ -21,6 +21,9 @@ type Classification struct {
 // this app asserts that the precedence of configs is what we expect
 func main() {
 	tc := TestConfig{
+		BaseConfiguration: config.BaseConfiguration{
+			//ConfigFile: "./config.json",
+		},
 		Text: "",
 		Primary: Classification{
 			A: "AC",
@@ -35,4 +38,5 @@ func main() {
 	if tcResult.Primary.A != "BC" {
 		log.Fatal("Primary.A was not 'BC'")
 	}
+	log.Printf("Completed successfully")
 }
