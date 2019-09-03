@@ -16,7 +16,7 @@ type ExampleConfig struct {
 ```
 
 Then, call config.Load on a pointer ref to an instance of the newly-created struct.  Ensure any property in the instance 
-is initialize to what you want the default value of that field to be.  Any slice should be initialize to an empty slice
+is initialized to what you want the default value of that field to be.  Any slice should be initialize to an empty slice
 for best results:
 
 ```go
