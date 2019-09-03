@@ -8,6 +8,7 @@ import (
 type TestConfig struct {
 	config.BaseConfiguration
 	Text      string
+	Debug     bool `json:"debug"`
 	Primary   Classification
 	Secondary *Classification `json:"Secondary,omitempty"`
 }

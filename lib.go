@@ -53,18 +53,18 @@ func Load(configWithDefaultValues interface{}, envPrefix ...string) (interface{}
 
 	// the order of precedence is file, env, flag
 
-	// process flags -> default/merged config
-	err = dot.Extend(configWithDefaultValues, flagCfg)
-	if err != nil {
-		return configWithDefaultValues, err
-	}
-
 	// process env -> default/merged config + flags
 	prefix := ""
 	if len(envPrefix) > 0 {
 		prefix = envPrefix[0]
 	}
 	if err := applyEnv(configWithDefaultValues, prefix); err != nil {
+		return configWithDefaultValues, err
+	}
+
+	// process flags -> default/merged config
+	err = dot.Extend(configWithDefaultValues, flagCfg)
+	if err != nil {
 		return configWithDefaultValues, err
 	}
 
@@ -92,12 +92,22 @@ func applyEnv(newCfg interface{}, prefix string) error {
 // TODO: ALLOW DESCS TO BE STATED SOMEHOW
 func applyFlags(flagCfg interface{}) error {
 	keys := dot.KeysRecursiveLeaves(flagCfg)
-	hash := map[string]*string{}
 	for _, key := range keys {
 		k := strings.ReplaceAll(key, ".", "-")
-		hash[k] = new(string)
-		val := dot.GetString(flagCfg, k)
-		flag.StringVar(hash[k], k, val, "")
+
+		dotVal, _ := dot.Get(flagCfg, k)
+		isTypeSet := false
+		if dotVal != nil {
+			if dv, ok := dotVal.(bool); ok {
+				isTypeSet = true
+				flag.BoolVar(new(bool), k, dv, "")
+			}
+		}
+
+		if !isTypeSet {
+			val := dot.GetString(flagCfg, k)
+			flag.StringVar(new(string), k, val, "")
+		}
 	}
 
 	flag.Parse()
@@ -105,7 +115,8 @@ func applyFlags(flagCfg interface{}) error {
 	var visitErr error
 	flag.Visit(func(f *flag.Flag) {
 		name := strings.Replace(f.Name, "-", ".", -1)
-		if err := dot.Set(flagCfg, name, f.Value.String()); err != nil {
+
+		if err := dot.Set(flagCfg, name, f.Value); err != nil {
 			visitErr = err
 		}
 	})
