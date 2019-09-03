@@ -15,8 +15,9 @@ type ExampleConfig struct {
 }
 ```
 
-Then, all config.Load on a pointer ref to an instance of the newly-created struct.  Ensure any
-property in the instance is initialize to what you want the default value of that field to be:
+Then, all config.Load on a pointer ref to an instance of the newly-created struct.  Ensure any property in the instance 
+is initialize to what you want the default value of that field to be.  Any slice should be initialize to an empty slice
+for best results:
 
 ```go
 tc := TestConfig{
