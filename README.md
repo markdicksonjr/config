@@ -1,12 +1,12 @@
 # Config
 
 Simple configuration module.  By default, will load a configuration from a file (optional, but must be JSON if 
-provided), env vars, then flags.  A flag will be exposed for your app "-configFile" which lets the app declare where to 
+provided), env vars, then flags.  A special flag will be exposed for your app "-configFile" which lets the app declare where to 
 find a config file.
 
 ## Usage
 
-First, create a struct that is a composition of config.BaseConfiguration:
+First, create a struct that is a composition of config.BaseConfiguration, along with your other configuration attributes:
 
 ```go
 type ExampleConfig struct {
