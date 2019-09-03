@@ -18,6 +18,7 @@ type Classification struct {
 }
 
 // main will start the test app - to test, provide either a flag "-Primary-A BC" or a config file with Primary.A = "BC"
+// this app asserts that the precedence of configs is what we expect
 func main() {
 	tc := TestConfig{
 		Text: "",

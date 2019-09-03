@@ -40,7 +40,7 @@ func Load(configWithDefaultValues interface{}, envPrefix ...string) (interface{}
 		}
 		var cfgFromFile interface{}
 
-		if err = json.Unmarshal(file, cfgFromFile); err != nil {
+		if err = json.Unmarshal(file, &cfgFromFile); err != nil {
 			return configWithDefaultValues, err
 		}
 
