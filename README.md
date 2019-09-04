@@ -1,8 +1,8 @@
 # Config
 
-Simple configuration module.  By default, will load a configuration from a file (optional, can be either JSON or YAML if 
+Simple configuration module.  By default, it will load a configuration from a file (optional, can be either JSON or YAML if 
 provided), env vars, then flags.  A special flag will be exposed for your app "-configFile" which lets the app declare 
-where to find a config file.
+where to find a JSON or YAML config file.
 
 ## Usage
 
