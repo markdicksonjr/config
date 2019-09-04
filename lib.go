@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"github.com/markdicksonjr/dot"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"strings"
 	"syscall"
@@ -40,8 +41,14 @@ func Load(configWithDefaultValues interface{}, envPrefix ...string) (interface{}
 		}
 		var cfgFromFile interface{}
 
-		if err = json.Unmarshal(file, &cfgFromFile); err != nil {
-			return configWithDefaultValues, err
+		if strings.HasSuffix(configFile, "json") {
+			if err = json.Unmarshal(file, &cfgFromFile); err != nil {
+				return configWithDefaultValues, err
+			}
+		} else {
+			if err = yaml.Unmarshal(file, &cfgFromFile); err != nil {
+				return configWithDefaultValues, err
+			}
 		}
 
 		// allow a config file to overwrite the "default" config

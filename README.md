@@ -1,8 +1,8 @@
 # Config
 
-Simple configuration module.  By default, will load a configuration from a file (optional, but must be JSON if 
-provided), env vars, then flags.  A special flag will be exposed for your app "-configFile" which lets the app declare where to 
-find a config file.
+Simple configuration module.  By default, will load a configuration from a file (optional, can be either JSON or YAML if 
+provided), env vars, then flags.  A special flag will be exposed for your app "-configFile" which lets the app declare 
+where to find a config file.
 
 ## Usage
 
