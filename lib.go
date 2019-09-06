@@ -97,39 +97,74 @@ func applyEnv(newCfg interface{}, prefix string) error {
 	return nil
 }
 
+type BoolVar struct {
+	Ptr  *bool
+	Key  string
+	Name string
+}
+
+type StringVar struct {
+	Ptr  *string
+	Key  string
+	Name string
+}
+
 // TODO: ALLOW DESCS TO BE STATED SOMEHOW
 func applyFlags(flagCfg interface{}) error {
 	keys := dot.KeysRecursiveLeaves(flagCfg)
+	var boolFlags []BoolVar
+	var stringFlags []StringVar
+
 	for _, key := range keys {
 		k := strings.ReplaceAll(key, ".", "-")
 
 		dotVal, _ := dot.Get(flagCfg, key)
-		isTypeSet := false
-		if dotVal != nil {
-			if dv, ok := dotVal.(bool); ok {
-				isTypeSet = true
-				flag.BoolVar(new(bool), k, dv, "")
-			}
+		if dotVal == nil {
+			continue
 		}
 
-		if !isTypeSet {
-			val := dot.GetString(flagCfg, k)
-			flag.StringVar(new(string), k, val, "")
+		if ds, ok := dotVal.(string); ok {
+			strFlag := StringVar{
+				Name: k,
+				Key:  key,
+				Ptr:  nil,
+			}
+			strFlag.Ptr = flag.String(strFlag.Name, ds, "")
+			stringFlags = append(stringFlags, strFlag)
+			continue
 		}
+
+		if dv, ok := dotVal.(bool); ok {
+			boolFlag := BoolVar{
+				Name: k,
+				Key:  key,
+				Ptr:  nil,
+			}
+			boolFlag.Ptr = flag.Bool(boolFlag.Name, dv, "")
+			boolFlags = append(boolFlags, boolFlag)
+			continue
+		}
+
+		// TODO: more types
 	}
 
 	flag.Parse()
 
-	var visitErr error
-	flag.Visit(func(f *flag.Flag) {
-		name := strings.Replace(f.Name, "-", ".", -1)
-
-		if err := dot.Set(flagCfg, name, f.Value); err != nil {
-			visitErr = err
+	// loop through booleans and apply them
+	for _, boolKey := range boolFlags {
+		if err := dot.Set(flagCfg, boolKey.Key, *boolKey.Ptr); err != nil {
+			return err
 		}
-	})
+	}
 
-	return visitErr
+	// loop through strings and apply them
+	for _, stringKey := range stringFlags {
+		if err := dot.Set(flagCfg, stringKey.Key, *stringKey.Ptr); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func blankCopy(val interface{}) (map[string]interface{}, error) {
