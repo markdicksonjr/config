@@ -16,6 +16,7 @@ import (
 // file should be loaded
 type BaseConfiguration struct {
 	ConfigFile string `json:"configFile"`
+	TestBool   bool
 }
 
 func Load(configWithDefaultValues interface{}, envPrefix ...string) (interface{}, error) {
@@ -172,9 +173,20 @@ func blankCopy(val interface{}) (map[string]interface{}, error) {
 	recursiveLeavesKeys := dot.KeysRecursiveLeaves(val)
 	for _, key := range recursiveLeavesKeys {
 		dotVal, _ := dot.Get(val, key)
+		dotType := reflect.TypeOf(dotVal)
+
+		if dotType.Kind() == reflect.Ptr {
+
+			// save the zero-d version of the key to the outbound map
+			asZero := reflect.Zero(dotType.Elem())
+			if err := dot.Set(finalMap, key, asZero.Interface()); err != nil {
+				return nil, err
+			}
+			continue
+		}
 
 		// save the zero-d version of the key to the outbound map
-		asZero := reflect.Zero(reflect.TypeOf(dotVal))
+		asZero := reflect.Zero(dotType)
 		if err := dot.Set(finalMap, key, asZero.Interface()); err != nil {
 			return nil, err
 		}
