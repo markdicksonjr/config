@@ -6,6 +6,7 @@ import (
 	"github.com/markdicksonjr/dot"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"reflect"
 	"strings"
 	"syscall"
 )
@@ -20,7 +21,7 @@ type BaseConfiguration struct {
 func Load(configWithDefaultValues interface{}, envPrefix ...string) (interface{}, error) {
 
 	// first, grab the flags - they may contain info about files, etc, to grab other configs from
-	flagCfg, err := copy(configWithDefaultValues)
+	flagCfg, err := blankCopy(configWithDefaultValues)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +103,7 @@ func applyFlags(flagCfg interface{}) error {
 	for _, key := range keys {
 		k := strings.ReplaceAll(key, ".", "-")
 
-		dotVal, _ := dot.Get(flagCfg, k)
+		dotVal, _ := dot.Get(flagCfg, key)
 		isTypeSet := false
 		if dotVal != nil {
 			if dv, ok := dotVal.(bool); ok {
@@ -131,16 +132,18 @@ func applyFlags(flagCfg interface{}) error {
 	return visitErr
 }
 
-func copy(val interface{}) (interface{}, error) {
-	marshalled, err := json.Marshal(val)
-	if err != nil {
-		return nil, err
+func blankCopy(val interface{}) (map[string]interface{}, error) {
+	finalMap := make(map[string]interface{})
+	recursiveLeavesKeys := dot.KeysRecursiveLeaves(val)
+	for _, key := range recursiveLeavesKeys {
+		dotVal, _ := dot.Get(val, key)
+
+		// save the zero-d version of the key to the outbound map
+		asZero := reflect.Zero(reflect.TypeOf(dotVal))
+		if err := dot.Set(finalMap, key, asZero.Interface()); err != nil {
+			return nil, err
+		}
 	}
 
-	var copy interface{}
-	if err := json.Unmarshal(marshalled, &copy); err != nil {
-		return nil, err
-	}
-
-	return copy, nil
+	return finalMap, nil
 }
