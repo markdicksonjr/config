@@ -20,7 +20,7 @@ is initialized to what you want the default value of that field to be.  Any slic
 for best results:
 
 ```go
-tc := TestConfig{
+tc := ExampleConfig{
     Text: "defaultText",
 }
 cfg, err := config.Load(&tc)
@@ -28,7 +28,7 @@ if err != nil {
     log.Fatal(err)
 }
 
-tcResult := cfg.(*TestConfig)
+tcResult := cfg.(*ExampleConfig)
 ```
 
 In this example, it will load a config file from wherever the -configFile flag references.  If it is not
@@ -48,7 +48,7 @@ To provide a default config file (to not require a flag/cli arg), you can initia
 BaseConfiguration.ConfigFile:
 
 ```go
-tc := TestConfig{
+tc := ExampleConfig{
     BaseConfiguration: config.BaseConfiguration{
         ConfigFile: "./config.json",
     },
