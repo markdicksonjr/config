@@ -33,6 +33,11 @@ func Load(configWithDefaultValues interface{}, envPrefix ...string) (interface{}
 	// grab the config file, defaulting to config.json
 	configFile := dot.GetString(flagCfg, "configFile")
 
+	// if the flags don't provide a config file, fall back to the user-provided default config
+	if len(configFile) == 0 {
+		configFile = dot.GetString(configWithDefaultValues, "configFile")
+	}
+
 	// allow the config file to be optional (merge it into the default, if it's there)
 	if len(configFile) > 0 {
 
