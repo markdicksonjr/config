@@ -19,6 +19,11 @@ type BaseConfiguration struct {
 	TestBool   bool
 }
 
+// Load will apply changes to the configWithDefaultValues object provided by the user.  The
+// precedence of value application (from most to least) is: flags, environment variables,
+// file, then default configuration (provided by the user as the first parameter to this function).
+// An optional "envPrefix" can be provided to this function to help differentiate its environment
+// variable keys from those of the rest of the apps on the system.
 func Load(configWithDefaultValues interface{}, envPrefix ...string) (interface{}, error) {
 
 	// first, grab the flags - they may contain info about files, etc, to grab other configs from
@@ -103,13 +108,13 @@ func applyEnv(newCfg interface{}, prefix string) error {
 	return nil
 }
 
-type BoolVar struct {
+type boolVar struct {
 	Ptr  *bool
 	Key  string
 	Name string
 }
 
-type StringVar struct {
+type stringVar struct {
 	Ptr  *string
 	Key  string
 	Name string
@@ -118,8 +123,8 @@ type StringVar struct {
 // TODO: ALLOW DESCS TO BE STATED SOMEHOW
 func applyFlags(flagCfg interface{}) error {
 	keys := dot.KeysRecursiveLeaves(flagCfg)
-	var boolFlags []BoolVar
-	var stringFlags []StringVar
+	var boolFlags []boolVar
+	var stringFlags []stringVar
 
 	for _, key := range keys {
 		k := strings.ReplaceAll(key, ".", "-")
@@ -130,7 +135,7 @@ func applyFlags(flagCfg interface{}) error {
 		}
 
 		if ds, ok := dotVal.(string); ok {
-			strFlag := StringVar{
+			strFlag := stringVar{
 				Name: k,
 				Key:  key,
 				Ptr:  nil,
@@ -141,7 +146,7 @@ func applyFlags(flagCfg interface{}) error {
 		}
 
 		if dv, ok := dotVal.(bool); ok {
-			boolFlag := BoolVar{
+			boolFlag := boolVar{
 				Name: k,
 				Key:  key,
 				Ptr:  nil,

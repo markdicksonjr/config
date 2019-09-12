@@ -5,6 +5,8 @@ import (
 	"log"
 )
 
+// TestConfig reflects an example of how an app's configuration should look:
+// it is composed of config.BaseConfiguration, as well as additional attributes
 type TestConfig struct {
 	config.BaseConfiguration
 	Text      string
@@ -13,6 +15,7 @@ type TestConfig struct {
 	Secondary *Classification `json:"Secondary,omitempty"`
 }
 
+// Classification is a simple struct within TestConfig.  It's a simple 2-tuple
 type Classification struct {
 	A string
 	B string
