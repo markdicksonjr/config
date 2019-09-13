@@ -65,4 +65,5 @@ a second argument for config.Load (the uppercase value of what is provided will 
 cfg, err := config.Load(&tc, "myapp")
 ```
 
-This will make something like "MYAPP_TEXT" correspond to the "Text" property in the examples above.
+This will make something like "MYAPP_TEXT" correspond to the "Text" property in the examples above. Usage of this feature is
+recommended so as not to collide with system environment variables as easily. 
