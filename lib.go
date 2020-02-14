@@ -16,7 +16,6 @@ import (
 // file should be loaded
 type BaseConfiguration struct {
 	ConfigFile string `json:"configFile"`
-	TestBool   bool
 }
 
 // Load will apply changes to the configWithDefaultValues object provided by the user.  The
