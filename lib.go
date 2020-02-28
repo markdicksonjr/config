@@ -123,7 +123,9 @@ type stringVar struct {
 func applyFlags(flagCfg interface{}) error {
 	keys := dot.KeysRecursiveLeaves(flagCfg)
 	var boolFlags []boolVar
+	var boolPtrFlags []boolVar
 	var stringFlags []stringVar
+	var stringPtrFlags []stringVar
 
 	for _, key := range keys {
 		k := strings.ReplaceAll(key, ".", "-")
@@ -155,6 +157,28 @@ func applyFlags(flagCfg interface{}) error {
 			continue
 		}
 
+		if dvp, ok := dotVal.(*bool); ok {
+			boolFlag := boolVar{
+				Name: k,
+				Key:  key,
+				Ptr:  dvp,
+			}
+			flag.BoolVar(dvp, boolFlag.Name, false, "")
+			boolPtrFlags = append(boolPtrFlags, boolFlag)
+			continue
+		}
+
+		if svp, ok := dotVal.(*string); ok {
+			strFlag := stringVar{
+				Name: k,
+				Key:  key,
+				Ptr:  svp,
+			}
+			flag.StringVar(svp, strFlag.Name, "", "")
+			stringPtrFlags = append(stringPtrFlags, strFlag)
+			continue
+		}
+
 		// TODO: more types
 	}
 
@@ -167,9 +191,21 @@ func applyFlags(flagCfg interface{}) error {
 		}
 	}
 
+	for _, boolPtrKey := range boolPtrFlags {
+		if err := dot.Set(flagCfg, boolPtrKey.Key, boolPtrKey.Ptr); err != nil {
+			return err
+		}
+	}
+
 	// loop through strings and apply them
 	for _, stringKey := range stringFlags {
 		if err := dot.Set(flagCfg, stringKey.Key, *stringKey.Ptr); err != nil {
+			return err
+		}
+	}
+
+	for _, strPtrKey := range stringPtrFlags {
+		if err := dot.Set(flagCfg, strPtrKey.Key, strPtrKey.Ptr); err != nil {
 			return err
 		}
 	}

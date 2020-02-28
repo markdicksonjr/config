@@ -1,7 +1,7 @@
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/markdicksonjr/dot v0.6.15 h1:qAw8NhyGzmC0mbu3Imxxx2wtgGT6qs3tk6PHUwpKWCQ=
-github.com/markdicksonjr/dot v0.6.15/go.mod h1:56w2FRih96QqJky5Wu1dn5bJcJKEaq5HSOo//x+y1rw=
+github.com/markdicksonjr/dot v0.8.0 h1:tf9/zUpl17duOukWjOGPALwjWpLwNynU0OKAfnlRf7Y=
+github.com/markdicksonjr/dot v0.8.0/go.mod h1:56w2FRih96QqJky5Wu1dn5bJcJKEaq5HSOo//x+y1rw=
 github.com/oleiade/reflections v1.0.0 h1:0ir4pc6v8/PJ0yw5AEtMddfXpWBXg9cnG7SgSoJuCgY=
 github.com/oleiade/reflections v1.0.0/go.mod h1:RbATFBbKYkVdqmSFtx13Bb/tVhR0lgOBXunWTZKeL4w=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

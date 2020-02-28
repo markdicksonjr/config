@@ -10,7 +10,9 @@ import (
 type TestConfig struct {
 	config.BaseConfiguration
 	Text      string
-	Debug     bool `json:"debug"`
+	Debug     bool    `json:"debug"`
+	Version   *bool   `json:"version,omitempty"`
+	Name      *string `json:"name,omitempty"`
 	Primary   Classification
 	Secondary *Classification `json:"Secondary,omitempty"`
 }
@@ -24,6 +26,7 @@ type Classification struct {
 // main will start the test app - to test, provide either a flag "-Primary-A BC" or a config file with Primary.A = "BC"
 // this app asserts that the precedence of configs is what we expect
 func main() {
+	isTrue := true
 	tc := TestConfig{
 		BaseConfiguration: config.BaseConfiguration{
 			//ConfigFile: "./config.json",
@@ -32,6 +35,8 @@ func main() {
 		Primary: Classification{
 			A: "AC",
 		},
+		Name: nil,
+		Version: &isTrue,
 	}
 	fg, err := config.Load(&tc)
 	if err != nil {
