@@ -128,8 +128,6 @@ func applyFlags(flagCfg interface{}) error {
 	var stringPtrFlags []stringVar
 
 	for _, key := range keys {
-		valuePath := strings.ReplaceAll(key, ".", "-")
-
 		dotVal, _ := dot.Get(flagCfg, key)
 		if dotVal == nil {
 			continue
@@ -139,12 +137,12 @@ func applyFlags(flagCfg interface{}) error {
 		for i, k := range keys {
 			keys[i] = strings.ToLower(string(k[0])) + k[1:]
 		}
-		camelKey := strings.Join(keys, ".")
+		camelKey := strings.Join(keys, "-")
 
 		if ds, ok := dotVal.(string); ok {
 			strFlag := stringVar{
-				Name: valuePath,
-				Key:  camelKey,
+				Name: camelKey,
+				Key:  key,
 				Ptr:  nil,
 			}
 			strFlag.Ptr = flag.String(strFlag.Name, ds, "")
@@ -154,8 +152,8 @@ func applyFlags(flagCfg interface{}) error {
 
 		if dv, ok := dotVal.(bool); ok {
 			boolFlag := boolVar{
-				Name: valuePath,
-				Key:  camelKey,
+				Name: camelKey,
+				Key:  key,
 				Ptr:  nil,
 			}
 			boolFlag.Ptr = flag.Bool(boolFlag.Name, dv, "")
@@ -165,8 +163,8 @@ func applyFlags(flagCfg interface{}) error {
 
 		if dvp, ok := dotVal.(*bool); ok {
 			boolFlag := boolVar{
-				Name: valuePath,
-				Key:  camelKey,
+				Name: camelKey,
+				Key:  key,
 				Ptr:  dvp,
 			}
 			flag.BoolVar(dvp, boolFlag.Name, false, "")
@@ -176,8 +174,8 @@ func applyFlags(flagCfg interface{}) error {
 
 		if svp, ok := dotVal.(*string); ok {
 			strFlag := stringVar{
-				Name: valuePath,
-				Key:  camelKey,
+				Name: camelKey,
+				Key:  key,
 				Ptr:  svp,
 			}
 			flag.StringVar(svp, strFlag.Name, "", "")
