@@ -35,11 +35,11 @@ func Load(configWithDefaultValues interface{}, envPrefix ...string) (interface{}
 	}
 
 	// grab the config file, defaulting to config.json
-	configFile := dot.GetString(flagCfg, "configFile")
+	configFile := dot.GetString(flagCfg, "configFile", "ConfigFile")
 
 	// if the flags don't provide a config file, fall back to the user-provided default config
 	if len(configFile) == 0 {
-		configFile = dot.GetString(configWithDefaultValues, "configFile")
+		configFile = dot.GetString(configWithDefaultValues, "configFile", "ConfigFile")
 	}
 
 	// allow the config file to be optional (merge it into the default, if it's there)
@@ -161,24 +161,28 @@ func applyFlags(flagCfg interface{}) error {
 			continue
 		}
 
-		if dvp, ok := dotVal.(*bool); ok {
+		if _, ok := dotVal.(*bool); ok {
+			empty := false
+
 			boolFlag := boolVar{
 				Name: camelKey,
 				Key:  key,
-				Ptr:  dvp,
+				Ptr:  &empty,
 			}
-			flag.BoolVar(dvp, boolFlag.Name, false, "")
+			flag.BoolVar(&empty, boolFlag.Name, false, "")
 			boolPtrFlags = append(boolPtrFlags, boolFlag)
 			continue
 		}
 
-		if svp, ok := dotVal.(*string); ok {
+		if _, ok := dotVal.(*string); ok {
+			empty := ""
+
 			strFlag := stringVar{
 				Name: camelKey,
 				Key:  key,
-				Ptr:  svp,
+				Ptr:  &empty,
 			}
-			flag.StringVar(svp, strFlag.Name, "", "")
+			flag.StringVar(&empty, strFlag.Name, "", "")
 			stringPtrFlags = append(stringPtrFlags, strFlag)
 			continue
 		}
@@ -217,32 +221,37 @@ func applyFlags(flagCfg interface{}) error {
 	return nil
 }
 
-func blankCopy(val interface{}) (map[string]interface{}, error) {
-	finalMap := make(map[string]interface{})
-	recursiveLeavesKeys := dot.KeysRecursiveLeaves(val)
-	for _, key := range recursiveLeavesKeys {
-		dotVal, _ := dot.Get(val, key)
-		if dotVal == nil {
-			continue
-		}
-		dotType := reflect.TypeOf(dotVal)
+func blankCopy(val interface{}) (interface{}, error) {
+	_, canBeMap := val.(map[string]interface{})
+	if canBeMap {
+		finalMap := make(map[string]interface{})
+		recursiveLeavesKeys := dot.KeysRecursiveLeaves(val)
+		for _, key := range recursiveLeavesKeys {
+			dotVal, _ := dot.Get(val, key)
+			if dotVal == nil {
+				continue
+			}
+			dotType := reflect.TypeOf(dotVal)
 
-		if dotType.Kind() == reflect.Ptr {
+			if dotType.Kind() == reflect.Ptr {
+
+				// save the zero-d version of the key to the outbound map
+				asZero := reflect.Zero(dotType.Elem())
+				if err := dot.Set(finalMap, key, asZero.Interface()); err != nil {
+					return nil, err
+				}
+				continue
+			}
 
 			// save the zero-d version of the key to the outbound map
-			asZero := reflect.Zero(dotType.Elem())
+			asZero := reflect.Zero(dotType)
 			if err := dot.Set(finalMap, key, asZero.Interface()); err != nil {
 				return nil, err
 			}
-			continue
 		}
 
-		// save the zero-d version of the key to the outbound map
-		asZero := reflect.Zero(dotType)
-		if err := dot.Set(finalMap, key, asZero.Interface()); err != nil {
-			return nil, err
-		}
+		return finalMap, nil
 	}
 
-	return finalMap, nil
+	return reflect.New(reflect.TypeOf(val).Elem()).Elem().Addr().Interface(), nil
 }
