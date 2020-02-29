@@ -218,6 +218,9 @@ func blankCopy(val interface{}) (map[string]interface{}, error) {
 	recursiveLeavesKeys := dot.KeysRecursiveLeaves(val)
 	for _, key := range recursiveLeavesKeys {
 		dotVal, _ := dot.Get(val, key)
+		if dotVal == nil {
+			continue
+		}
 		dotType := reflect.TypeOf(dotVal)
 
 		if dotType.Kind() == reflect.Ptr {
