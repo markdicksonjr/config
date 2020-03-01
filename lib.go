@@ -46,23 +46,27 @@ func Load(configWithDefaultValues interface{}, envPrefix ...string) (interface{}
 	if len(configFile) > 0 {
 
 		// read config.json
-		file, err := ioutil.ReadFile(configFile)
+		fileContents, err := ioutil.ReadFile(configFile)
 		if err != nil {
 			return configWithDefaultValues, err
 		}
-		var cfgFromFile interface{}
+
+		cfgFromFile, err := blankCopy(configWithDefaultValues)
+		if err != nil {
+			return nil, err
+		}
 
 		if strings.HasSuffix(configFile, "json") {
-			if err = json.Unmarshal(file, &cfgFromFile); err != nil {
+			if err = json.Unmarshal(fileContents, &cfgFromFile); err != nil {
 				return configWithDefaultValues, err
 			}
 		} else {
-			if err = yaml.Unmarshal(file, &cfgFromFile); err != nil {
+			if err = yaml.Unmarshal(fileContents, &cfgFromFile); err != nil {
 				return configWithDefaultValues, err
 			}
 		}
 
-		// allow a config file to overwrite the "default" config
+		// allow a config fileContents to overwrite the "default" config
 		err = dot.Extend(configWithDefaultValues, cfgFromFile)
 		if err != nil {
 			return configWithDefaultValues, err
