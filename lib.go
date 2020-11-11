@@ -123,11 +123,19 @@ type stringVar struct {
 	Name string
 }
 
+type intVar struct {
+	Ptr  *int
+	Key  string
+	Name string
+}
+
 // TODO: ALLOW DESCS TO BE STATED SOMEHOW
 func applyFlags(flagCfg interface{}) error {
 	keys := dot.KeysRecursiveLeaves(flagCfg)
 	var boolFlags []boolVar
 	var boolPtrFlags []boolVar
+	var intFlags []intVar
+	var intPtrFlags []intVar
 	var stringFlags []stringVar
 	var stringPtrFlags []stringVar
 
@@ -178,6 +186,30 @@ func applyFlags(flagCfg interface{}) error {
 			continue
 		}
 
+		if dv, ok := dotVal.(int); ok {
+			intFlag := intVar{
+				Name: camelKey,
+				Key:  key,
+				Ptr:  nil,
+			}
+			intFlag.Ptr = flag.Int(intFlag.Name, dv, "")
+			intFlags = append(intFlags, intFlag)
+			continue
+		}
+
+		if _, ok := dotVal.(*int); ok {
+			empty := 0
+
+			intFlag := intVar{
+				Name: camelKey,
+				Key:  key,
+				Ptr:  &empty,
+			}
+			flag.IntVar(&empty, intFlag.Name, 0, "")
+			intPtrFlags = append(intPtrFlags, intFlag)
+			continue
+		}
+
 		if _, ok := dotVal.(*string); ok {
 			empty := ""
 
@@ -205,6 +237,19 @@ func applyFlags(flagCfg interface{}) error {
 
 	for _, boolPtrKey := range boolPtrFlags {
 		if err := dot.Set(flagCfg, boolPtrKey.Key, boolPtrKey.Ptr); err != nil {
+			return err
+		}
+	}
+
+	// loop through ints and apply them
+	for _, intKey := range intFlags {
+		if err := dot.Set(flagCfg, intKey.Key, *intKey.Ptr); err != nil {
+			return err
+		}
+	}
+
+	for _, intPtrKey := range intPtrFlags {
+		if err := dot.Set(flagCfg, intPtrKey.Key, intPtrKey.Ptr); err != nil {
 			return err
 		}
 	}
